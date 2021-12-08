@@ -33,10 +33,9 @@ export default {
   methods: {
     Login() {
       this.$store.dispatch("loginUser", {
-        loginMail: this.loginMail,
-        loginPassword: this.loginPassword,
+        email: this.loginMail,
+        password: this.loginPassword,
       });
-      this.$router.push("/home");
     },
   },
 };

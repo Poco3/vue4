@@ -49,7 +49,6 @@ export default {
         password: this.password,
         username: this.username,
       });
-      this.$router.push("/home");
     },
   },
 };
