@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import firebase from "firebase";
+import router from './router';
 
 Vue.use(Vuex);
 
@@ -10,48 +11,52 @@ export default new Vuex.Store({
             email: "",
             password: "",
             username: "",
-            loginMail: "",
-            loginPassword: "",
+
         }
     },
     getters: {
         email: state => state.email,
         password: state => state.password,
         username: state => state.username,
-        loginMail: state => state.loginMail,
-        loginPassword: state => state.loginPassword,
 
 
     },
     mutations: {
-        setUser(state, word) {
-            state.email = word.email
-            state.password = word.password
-            state.username = word.username
+        setUser(state, payload) {
+            state.email = payload.email
+            state.password = payload.password
+            state.username = payload.username
         },
-        setLogin(state, pass) {
-            state.loginMail = pass.loginMail
-            state.loginPassword = pass.loginPassword
-
-        }
     },
     actions: {
-        createUser(context, word) {
-            firebase.auth().createUserWithEmailAndPassword(word.email, word.password)
+        createUser(context, payload) {
+            firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
                 .then(() => {
-                    context.commit('setUser', word)
-                }).catch((error) => {
+                    firebase.auth().currentUser.updateProfile({
+                        displayName: payload.username
+                    })
+                        .then(() => {
+                            context.commit('setUser', payload)
+                        })
+                        .then(() => {
+                            router.push('/home')
+                        })
+                })
+                .catch((error) => {
                     console.log(error);
                 })
 
         },
-        loginUser(context, pass) {
+        loginUser(context, payload) {
             firebase
-                .auth()
-                .signInWithEmailAndPassword(pass.loginMail, pass.loginPassword)
+                .auth().signInWithEmailAndPassword(payload.email, payload.password)
                 .then(() => {
-                    context.commit('setLogin', pass)
-                }).catch((error) => {
+                    context.commit('setUser', payload)
+                })
+                .then(() => {
+                    router.push('/home')
+                })
+                .catch((error) => {
                     console.log(error)
                     alert('エラー');
                 })
@@ -59,4 +64,4 @@ export default new Vuex.Store({
         }
     }
 
-})
+});
