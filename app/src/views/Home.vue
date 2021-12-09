@@ -4,7 +4,7 @@
       <h2>{{user}}さんようこそ!!</h2>
       <p>
         残高:1000
-        <button>ログアウト</button>
+        <button @click="logout">ログアウト</button>
       </p>
     </div>
     <h1>ユーザー覧</h1>
@@ -13,6 +13,7 @@
 
 <script>
 import firebase from "firebase";
+
 export default {
   data() {
     return {
@@ -23,6 +24,23 @@ export default {
     firebase.auth().onAuthStateChanged((user) => {
       this.user = user.displayName;
     });
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        console.log("login");
+      } else {
+        window.location.href = "/";
+      }
+    });
+  },
+  methods: {
+    logout() {
+      firebase
+        .auth()
+        .signOut()
+        .then(() => {
+          this.$router.push({ path: "/" });
+        });
+    },
   },
 };
 </script>
