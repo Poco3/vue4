@@ -61,6 +61,12 @@ export default new Vuex.Store({
                     alert('エラー');
                 })
 
+        },
+        logoutUser() {
+            firebase.auth().signOut()
+                .then(() => {
+                    router.push('/');
+                })
         }
     }
 
