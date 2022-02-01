@@ -7,51 +7,95 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        user: {
-            email: "",
-            password: "",
-            username: "",
-
-        }
+        email: "",
+        password: "",
+        username: "",
+        wallet: "",
+        uid: "",
     },
     getters: {
         email: state => state.email,
         password: state => state.password,
         username: state => state.username,
-
+        wallet: state => state.wallet,
 
     },
     mutations: {
-        setUser(state, payload) {
-            state.email = payload.email
-            state.password = payload.password
-            state.username = payload.username
+        createName(state, username) {
+            state.username = username
         },
+        createEmail(state, email) {
+            state.email = email
+        },
+        createPassword(state, password) {
+            state.password = password
+
+        },
+
+        setUser(state, { nameDate, walletDate }) {
+            state.username = nameDate
+            state.wallet = walletDate
+        },
+
+
+
+
     },
     actions: {
-        createUser(context, payload) {
-            firebase.auth().createUserWithEmailAndPassword(payload.email, payload.password)
+        createUser({ commit, state }) {
+            firebase.auth().createUserWithEmailAndPassword(state.email, state.password)
                 .then(() => {
-                    firebase.auth().currentUser.updateProfile({
-                        displayName: payload.username
+                    const userData = firebase.auth().currentUser
+                    userData.updateProfile({
+                        displayName: state.username,
+                    }).then(() => {
+                        const db = firebase.firestore();
+                        db.collection("users").doc(userData.uid).set({
+                            uid: userData.uid,
+                            email: userData.email,
+                            username: userData.displayName,
+                            wallet: 1000,
+
+                        })
+                            .then(() => {
+                                const users = db.collection('users').doc(userData.uid);
+                                users.get().then((doc) => {
+                                    const nameDate = doc.data().username;
+                                    const walletDate = doc.data().wallet;
+                                    commit("setUser", { nameDate, walletDate });
+                                }).catch((error) => {
+                                    console.log("Error getting document:", error);
+                                });
+                            }).then(() => {
+                                router.push('/home')
+                            })
+
                     })
-                        .then(() => {
-                            context.commit('setUser', payload)
-                        })
-                        .then(() => {
-                            router.push('/home')
-                        })
+
+
+
+
                 })
                 .catch((error) => {
                     console.log(error);
                 })
 
         },
-        loginUser(context, payload) {
+        loginUser({ commit }, { email, password }) {
             firebase
-                .auth().signInWithEmailAndPassword(payload.email, payload.password)
+                .auth().signInWithEmailAndPassword(email, password)
                 .then(() => {
-                    context.commit('setUser', payload)
+                    const userData = firebase.auth().currentUser
+                    commit('createName', userData.displayName)
+                    const db = firebase.firestore()
+                    const users = db.collection("users").doc(userData.uid);
+                    users.get().then((doc) => {
+                        const nameDate = doc.data().username;
+                        const walletDate = doc.data().wallet;
+                        commit('setUser', { nameDate, walletDate });
+                    }).catch((error) => {
+                        console.log("Error getting document:", error);
+                    });
                 })
                 .then(() => {
                     router.push('/home')
