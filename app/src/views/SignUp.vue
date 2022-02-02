@@ -6,26 +6,26 @@
         <tr>
           <th>ユーザー名:</th>
           <td>
-            <input type="text" placeholder="userName" @input="createName" />
+            <input type="text" placeholder="userName" v-model="username" />
           </td>
         </tr>
         <tr>
           <th>メールアドレス:</th>
           <td>
-            <input type="text" placeholder="E-mail" @input="createEmail" />
+            <input type="text" placeholder="E-mail" v-model="email" />
           </td>
         </tr>
         <tr>
           <th>パスワード:</th>
           <td>
-            <input type="password" placeholder="Password" @input="createPassword" />
+            <input type="password" placeholder="Password" v-model="password" />
           </td>
         </tr>
       </table>
     </center>
     <br />
 
-    <button @click="signUp" class="button">新規登録</button>
+    <button @click="Signup" class="button">新規登録</button>
 
     <br />
     <router-link to="/">ログインはこちら</router-link>
@@ -35,18 +35,20 @@
 
 <script>
 export default {
+  date() {
+    return {
+      email: "",
+      password: "",
+      username: "",
+    };
+  },
   methods: {
-    createName(e) {
-      this.$store.commit("createName", e.target.value);
-    },
-    createEmail(e) {
-      this.$store.commit("createEmail", e.target.value);
-    },
-    createPassword(e) {
-      this.$store.commit("createPassword", e.target.value);
-    },
-    signUp() {
-      this.$store.dispatch("createUser");
+    Signup() {
+      this.$store.dispatch("createUser", {
+        email: this.email,
+        password: this.password,
+        username: this.username,
+      });
     },
   },
 };
