@@ -1,12 +1,13 @@
 <template>
   <transition name="modal" appear>
-    <div id="overlay" @click="closeModal1">
+    <div id="overlay" @click="closeModal2">
       <div>
-        <div id="content">
-          <p>{{ userName }} さんの残高</p>
-          <p>{{ userWallet }}</p>
+        <div id="content" @click="stopEvent">
+          <p class="balance">あなたの残高: {{ wallet }}</p>
+          <p>送る金額</p>
+          <input type="text" v-model="amountMoney" />
           <footer class="modal-footer">
-            <button @click="closeModal1">close</button>
+            <button @click="sendWallet">送信</button>
           </footer>
         </div>
       </div>
@@ -16,35 +17,35 @@
 
 <script>
 export default {
-  name: "Modal1",
+  name: "Modal2",
+  data() {
+    return {
+      amountMoney: "",
+    };
+  },
   methods: {
-    closeModal1() {
-      this.$store.commit("closeModal1");
+    stopEvent() {
+      event.stopPropagation();
+    },
+    sendWallet() {
+      this.$store.dispatch("sendWallet", this.amountMoney);
+    },
+    closeModal2() {
+      this.$store.commit("closeModal2");
     },
   },
   computed: {
-    userName() {
-      return this.$store.getters.username;
-    },
-    userWallet() {
-      return this.$store.getters.userwallet;
+    wallet() {
+      return this.$store.getters.wallet;
     },
   },
 };
 </script>
 
 <style>
-#content {
-  z-index: 10;
-  width: 30%;
-  background-color: #fff;
-  border-radius: 4px;
-  position: fixed;
-  bottom: 0%;
-  left: 35%;
-}
-#content p {
-  margin: 10px 0;
+#content input {
+  width: 80%;
+  margin: 10px 0 0 0;
 }
 #overlay {
   z-index: 1;
@@ -63,7 +64,6 @@ export default {
   background: #ccc;
   padding: 10px;
   text-align: right;
-  margin-top: 10px;
 }
 .modal-footer button {
   margin: 0;
