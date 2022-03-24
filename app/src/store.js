@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import firebase from "firebase";
 import router from './router';
 
+
 Vue.use(Vuex);
 
 export default new Vuex.Store({
@@ -155,28 +156,34 @@ export default new Vuex.Store({
                 })
 
         },
-        sendWallet({ commit, state }, amountMoney) {
+        async sendWallet({ commit, state }, amountMoney) {
             let nowWallet = state.wallet - amountMoney
             const userData = firebase.auth().currentUser
             const db = firebase.firestore()
-            db.collection('users').doc(userData.uid).update({
-                wallet: nowWallet
-            }).then(() => {
-                commit('setWallet', { nowWallet, userData });
-
-
-                const num1 = parseInt(state.userwallet)
-                const num2 = parseInt(amountMoney)
-                let yourwallet = num1 + num2
-
-                const db = firebase.firestore()
-                db.collection("users").doc(state.useruid).update({
-                    wallet: yourwallet
-                }).then(() => {
-                    commit('setYourWallet', yourwallet)
-                    commit('closeModal2');
+            let eventDocRef = db.collection('users').doc(userData.uid);
+            await db.runTransaction(async transaction => {
+                await transaction.get(eventDocRef);
+                transaction.update(eventDocRef, {
+                    wallet: nowWallet
                 })
             })
+                .then(() => {
+                    commit('setWallet', { nowWallet, userData });
+
+
+
+                    const num1 = parseInt(state.userwallet)
+                    const num2 = parseInt(amountMoney)
+                    let yourwallet = num1 + num2
+
+                    const db = firebase.firestore()
+                    db.collection("users").doc(state.useruid).update({
+                        wallet: yourwallet
+                    }).then(() => {
+                        commit('setYourWallet', yourwallet)
+                        commit('closeModal2');
+                    })
+                })
         }, createUserList({ commit }) {
             const currentUser = firebase.auth().currentUser;
             this.uid = currentUser.uid;
